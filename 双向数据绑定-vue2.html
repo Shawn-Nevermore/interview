@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Vue2.0双向数据绑定原理</title>
+    </head>
+    <body>
+        姓名：<span id="spanName"></span>
+        <br />
+        <input type="text" id="inputName" />
+
+        <script>
+            let obj = {
+                name: '',
+            }
+            // 深克隆，选一种方式即可
+            let newObj = JSON.parse(JSON.stringify(obj))
+            Object.defineProperty(obj, 'name', {
+                get() {
+                    return newObj.name
+                },
+                set(value) {
+                    if (value === newObj.name) return
+                    newObj.name = value
+                    observe()
+                },
+            })
+
+            // Model改变更新View
+            function observe() {
+                spanName.innerHTML = obj.name
+                inputName.value = obj.name
+            }
+            observe()
+            setTimeout(() => {
+                obj.name = '更新了'
+            }, 1000)
+
+            // View输入改变更新Model
+            inputName.oninput = function () {
+                obj.name = this.value
+            }
+        </script>
+    </body>
+</html>
