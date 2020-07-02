@@ -20,21 +20,23 @@
 跨域产生的原因：前后端分离
 常见问题：你服务器是怎么部署的？（Linux + Nginx + Docker）
 
-### JSONP
-### iframe
-window.name
-document.domain
-location.hash
-post.message
-### CORS跨域资源共享
+### 1）JSONP
+
+### 2）iframe
+- window.name
+- document.domain
+- location.hash
+- post.message
+- 
+### 3）CORS跨域资源共享
 客户端
 登陆验证：第一次向服务器发请求，服务器告诉你成功了，会通过JWT算法生成一个TOKEN，把TOKEN直接给你，当客户端拿到TOKEN之后，可以存储到vuex/localstorage中。再一次发请求，我们需要在请求拦截器上把token都带上，`config.headers.Authorization = token`，即在请求头里带上Authorization字段。服务器再次接收到请求，再通过JWT算法进行校验，如果是之前给的token，说明是合法。这就保证了接口调用信息的安全性。
 
 服务器端
 Access-Control-Allow-Origin
-### 基于http proxy实现跨域请求
+### 4）基于http proxy实现跨域请求
 
-### Nginx反向代理
+### 5）Nginx反向代理
 
 ## HTTP缓存头部对比
 | 头部          | 优势和特点                                                                                                           | 劣势和问题                                                                                                                                                                                                                          |
@@ -45,3 +47,48 @@ Access-Control-Allow-Origin
 | ETag          | 1、可以更加精确的判断资源是否被修改，可以识别一秒内多次修改的情况。2、不存在版本问题，每次请求都回去服务器进行校验。 | 1、计算ETag值需要性能损耗。2、分布式服务器存储的情况下，计算ETag的算法如果不一样，会导致浏览器从一台服务器上获得页面内容后到另外一台服务器上进行验证时发现ETag不匹配的情况。                                                        |
 
 
+## Q：GET 和 POST 的区别
+
+错解，但是能过面试
+
+- GET在浏览器回退时是无害的，而POST会再次提交请求。
+- GET产生的URL地址可以被加入收藏栏，而POST不可以。
+- GET请求会被浏览器主动cache，而POST不会，除非手动设置。
+- GET请求只能进行url编码，而POST支持多种编码方式。
+- GET请求参数会被完整保留在浏览器历史记录里，而POST中的参数不会被保留。
+- GET请求在URL中传送的参数是有长度限制的，而POST么有。
+- 对参数的数据类型，GET只接受ASCII字符，而POST没有限制。
+- GET比POST更不安全，因为参数直接暴露在URL上，所以不能用来传递敏感信息。
+- GET参数通过URL传递，POST放在Request body中。
+
+正解，就一个区别：语义——GET 用于获取资源，POST 用于提交资源。
+
+想装逼请参考 https://zhuanlan.zhihu.com/p/22536382
+
+## Q：Cookie V.S. LocalStorage V.S. SessionStorage V.S. Session
+
+Cookie，LocalStorage，SessionStorage共同点：都是保存在浏览器端，并且是同源的。
+
+-   Cookie V.S. LocalStorage
+    Cookie 一般最大 4k，LocalStorage 可以用 5Mb 甚至 10Mb（各浏览器不同）
+    主要区别是 Cookie 会被发送到服务器，而 LocalStorage 不会
+-   Cookie V.S. Session
+    Cookie 存在浏览器的文件里，Session 存在服务器的文件里
+    Session 是基于 Cookie 实现的，具体做法就是把 SessionID 存在 Cookie 里
+-   LocalStorage V.S. SessionStorage
+    LocalStorage 一般不会自动过期（除非用户手动清除），而 SessionStorage 在回话结束时过期（如关闭浏览器）
+
+
+## Q：Cookie如何防范XSS攻击
+
+参考回答：
+XSS（跨站脚本攻击）是指攻击者在返回的HTML中嵌入javascript脚本，为了减轻这些攻击，需要在HTTP头部配上，`set-cookie：httponly`-这个属性可以防止XSS，它会禁止javascript脚本来访问cookie。
+
+`secure` - 这个属性告诉浏览器仅在请求为https的时候发送cookie。
+
+结果应该是这样的：Set-Cookie=<cookie-value>.....
+
+## csrf和xss的网络攻击及防范
+参考回答：
+-   CSRF：跨站请求伪造，可以理解为攻击者盗用了用户的身份，以用户的名义发送了恶意请求，比如用户登录了一个网站后，立刻在另一个ｔａｂ页面访问量攻击者用来制造攻击的网站，这个网站要求访问刚刚登陆的网站，并发送了一个恶意请求，这时候CSRF就产生了，比如这个制造攻击的网站使用一张图片，但是这种图片的链接却是可以修改数据库的，这时候攻击者就可以以用户的名义操作这个数据库，防御方式的话：使用验证码，检查https头部的refer，使用token
+-   XSS：跨站脚本攻击，是说攻击者通过注入恶意的脚本，在用户浏览网页的时候进行攻击，比如获取cookie，或者其他用户身份信息，可以分为存储型和反射型，存储型是攻击者输入一些数据并且存储到了数据库中，其他浏览者看到的时候进行攻击，反射型的话不存储在数据库中，往往表现为将攻击代码放在url地址的请求参数中，防御的话为cookie设置httpOnly属性，对用户的输入进行检查，进行特殊字符过滤

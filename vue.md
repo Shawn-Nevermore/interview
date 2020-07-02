@@ -124,3 +124,26 @@ inputName.oninput = function () {
     obj.name = this.value
 }
 ```
+
+## Q：watch 和 computed 和 methods 区别是什么？
+思路：先翻译单词，再阐述作用，最后强行找不同。
+要点：
+- computed 和 methods 相比，最大区别是 computed 有缓存：如果 computed 属性依赖的属性没有变化，那么 computed 属性就不会重新计算。methods 则是看到一次计算一次。
+- watch 和 computed 相比，computed 是计算出一个属性（废话），而 watch 则可能是做别的事情（如上报数据）
+
+## Q：Vue组件间通信
+
+- 父子组件：`$emit('xxx', data)` `$on('xxx', function(){})`
+- 爷孙组件、兄弟组件 eventBus
+```javascript
+var eventBus = new Vue()
+eventBus.$emit() 
+eventBus.$on()
+```
+-   Vuex
+
+
+## Q：你是怎么用Vuex的？
+
+背下文档第一句：Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式。
+说出核心概念的名字和作用：State/Getter/Mutation/Action/Module
